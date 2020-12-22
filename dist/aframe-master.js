@@ -61743,6 +61743,9 @@ module.exports.Component = registerComponent('vr-mode-ui', {
         uiElement.parentNode.removeChild(uiElement);
       }
     });
+    this.enterVREl = undefined;
+    this.enterAREl = undefined;
+    this.orientationModalEl = undefined;
   },
 
   updateEnterInterfaces: function () {
@@ -70668,7 +70671,11 @@ _dereq_('./core/a-mixin');
 _dereq_('./extras/components/');
 _dereq_('./extras/primitives/');
 
+<<<<<<< HEAD
 console.log('A-Frame Version: 1.1.0 (Date 2020-12-18, Commit #c6a68807)');
+=======
+console.log('A-Frame Version: 1.1.0 (Date 2020-12-20, Commit #50ac8254)');
+>>>>>>> dev_add_system_missing_func
 console.log('THREE Version (https://github.com/supermedium/three.js):',
             pkg.dependencies['super-three']);
 console.log('WebVR Polyfill Version:', pkg.dependencies['webvr-polyfill']);
