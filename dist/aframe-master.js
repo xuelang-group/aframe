@@ -70495,7 +70495,7 @@ _dereq_('./core/a-mixin');
 _dereq_('./extras/components/');
 _dereq_('./extras/primitives/');
 
-console.log('A-Frame Version: 1.1.0 (Date 2021-01-19, Commit #8e887511)');
+console.log('A-Frame Version: 1.1.0 (Date 2021-01-19, Commit #8209f603)');
 console.log('THREE Version (https://github.com/supermedium/three.js):',
             pkg.dependencies['super-three']);
 console.log('WebVR Polyfill Version:', pkg.dependencies['webvr-polyfill']);
@@ -72100,8 +72100,10 @@ function createVideoEl (src, width, height) {
   videoEl.setAttribute('webkit-playsinline', '');
   videoEl.autoplay = true;
   videoEl.loop = true;
+  videoEl.muted = true;
   videoEl.crossOrigin = 'anonymous';
   videoEl.addEventListener('loadeddata', function () {
+    console.log('videoEl', videoEl);
     videoEl.play();
   }, {once: true});
   videoEl.addEventListener('error', function () {
