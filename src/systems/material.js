@@ -365,8 +365,10 @@ function createVideoEl (src, width, height) {
   videoEl.setAttribute('webkit-playsinline', '');
   videoEl.autoplay = true;
   videoEl.loop = true;
+  videoEl.muted = true;
   videoEl.crossOrigin = 'anonymous';
   videoEl.addEventListener('loadeddata', function () {
+    console.log('videoEl', videoEl);
     videoEl.play();
   }, {once: true});
   videoEl.addEventListener('error', function () {
