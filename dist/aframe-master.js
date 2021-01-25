@@ -61054,7 +61054,7 @@ module.exports.Component = registerComponent('inspector', {
    * <ctrl> + <alt> + i keyboard shortcut.
    */
   onKeydown: function (evt) {
-    var shortcutPressed = evt.keyCode === 73 && evt.ctrlKey && evt.altKey;
+    var shortcutPressed = evt.keyCode === 73 && (evt.ctrlKey && evt.altKey || evt.getModifierState('AltGraph'));
     if (!shortcutPressed) { return; }
     this.openInspector();
   },
@@ -62291,14 +62291,11 @@ module.exports.Component = registerComponent('text', {
     this.shaderData = {};
     this.geometry = createTextGeometry();
     this.createOrUpdateMaterial();
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.el.setObject3D(this.attrName, this.mesh);
   },
 
   update: function (oldData) {
     var data = this.data;
     var font = this.currentFont;
-
     if (textures[data.font]) {
       this.texture = textures[data.font];
     } else {
@@ -62334,9 +62331,7 @@ module.exports.Component = registerComponent('text', {
     this.material = null;
     this.texture.dispose();
     this.texture = null;
-    if (this.shaderObject) {
-      delete this.shaderObject;
-    }
+    if (this.shaderObject) { delete this.shaderObject; }
   },
 
   /**
@@ -62401,7 +62396,7 @@ module.exports.Component = registerComponent('text', {
     if (!data.font) { warn('No font specified. Using the default font.'); }
 
     // Make invisible during font swap.
-    this.mesh.visible = false;
+    if (this.mesh) { this.mesh.visible = false; }
 
     // Look up font URL to use, and perform cached load.
     fontSrc = this.lookupFont(data.font || DEFAULT_FONT) || data.font;
@@ -62417,14 +62412,7 @@ module.exports.Component = registerComponent('text', {
       if (!fontWidthFactors[fontSrc]) {
         font.widthFactor = fontWidthFactors[font] = computeFontWidthFactor(font);
       }
-
-      // Update geometry given font metrics.
-      self.updateGeometry(geometry, font);
-
-      // Set font and update layout.
       self.currentFont = font;
-      self.updateLayout();
-
       // Look up font image URL to use, and perform cached load.
       fontImgSrc = self.getFontImageSrc();
       cache.get(fontImgSrc, function () {
@@ -62436,6 +62424,11 @@ module.exports.Component = registerComponent('text', {
         texture.needsUpdate = true;
         textures[data.font] = texture;
         self.texture = texture;
+        self.initMesh();
+        self.currentFont = font;
+        // Update geometry given font metrics.
+        self.updateGeometry(geometry, font);
+        self.updateLayout();
         self.mesh.visible = true;
         el.emit('textfontset', {font: data.font, fontObj: font});
       }).catch(function (err) {
@@ -62446,6 +62439,12 @@ module.exports.Component = registerComponent('text', {
       error(err.message);
       error(err.stack);
     });
+  },
+
+  initMesh: function () {
+    if (this.mesh) { return; }
+    this.mesh = new THREE.Mesh(this.geometry, this.material);
+    this.el.setObject3D(this.attrName, this.mesh);
   },
 
   getFontImageSrc: function () {
@@ -62479,7 +62478,7 @@ module.exports.Component = registerComponent('text', {
     var x;
     var y;
 
-    if (!geometry.layout) { return; }
+    if (!mesh || !geometry.layout) { return; }
 
     // Determine width to use (defined width, geometry's width, or default width).
     geometryComponent = el.getAttribute('geometry');
@@ -64035,6 +64034,7 @@ module.exports.Component = registerComponent('wasd-controls', {
 
     // Bind methods and add event listeners.
     this.onBlur = bind(this.onBlur, this);
+    this.onContextMenu = bind(this.onContextMenu, this);
     this.onFocus = bind(this.onFocus, this);
     this.onKeyDown = bind(this.onKeyDown, this);
     this.onKeyUp = bind(this.onKeyUp, this);
@@ -64149,6 +64149,7 @@ module.exports.Component = registerComponent('wasd-controls', {
   })(),
 
   attachVisibilityEventListeners: function () {
+    window.oncontextmenu = this.onContextMenu;
     window.addEventListener('blur', this.onBlur);
     window.addEventListener('focus', this.onFocus);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
@@ -64168,6 +64169,13 @@ module.exports.Component = registerComponent('wasd-controls', {
   removeKeyEventListeners: function () {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
+  },
+
+  onContextMenu: function () {
+    var keys = Object.keys(this.keys);
+    for (var i = 0; i < keys.length; i++) {
+      delete this.keys[keys[i]];
+    }
   },
 
   onBlur: function () {
@@ -70495,7 +70503,11 @@ _dereq_('./core/a-mixin');
 _dereq_('./extras/components/');
 _dereq_('./extras/primitives/');
 
+<<<<<<< HEAD
 console.log('A-Frame Version: 1.1.0 (Date 2021-01-19, Commit #8209f603)');
+=======
+console.log('A-Frame Version: 1.1.0 (Date 2021-01-22, Commit #9b15a622)');
+>>>>>>> dev_add_system_missing_func
 console.log('THREE Version (https://github.com/supermedium/three.js):',
             pkg.dependencies['super-three']);
 console.log('WebVR Polyfill Version:', pkg.dependencies['webvr-polyfill']);
