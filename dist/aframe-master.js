@@ -60387,7 +60387,7 @@ module.exports.Component = registerComponent('raycaster', {
     rawIntersections.length = 0;
     if (this.objects) {
       for (i = 0; i < this.objects.length; i++) {
-        if (this.objects[i].visible) {
+        if (this.objects[i].visible && this.objects[i].el.object3D.visible) {
           this.objects[i].layers.enable(data.layer);
         } else {
           this.objects[i].layers.disable(data.layer);
@@ -70533,7 +70533,7 @@ _dereq_('./core/a-mixin');
 _dereq_('./extras/components/');
 _dereq_('./extras/primitives/');
 
-console.log('A-Frame Version: 1.1.0 (Date 2021-01-29, Commit #4d06ef75)');
+console.log('A-Frame Version: 1.1.0 (Date 2021-01-29, Commit #1ee1e77c)');
 console.log('THREE Version (https://github.com/supermedium/three.js):',
             pkg.dependencies['super-three']);
 console.log('WebVR Polyfill Version:', pkg.dependencies['webvr-polyfill']);
