@@ -237,7 +237,7 @@ module.exports.Component = registerComponent('raycaster', {
     rawIntersections.length = 0;
     if (this.objects) {
       for (i = 0; i < this.objects.length; i++) {
-        if (this.objects[i].visible) {
+        if (this.objects[i].visible && this.objects[i].el.object3D.visible) {
           this.objects[i].layers.enable(data.layer);
         } else {
           this.objects[i].layers.disable(data.layer);
