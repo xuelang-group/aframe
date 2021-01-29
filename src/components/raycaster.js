@@ -177,9 +177,11 @@ module.exports.Component = registerComponent('raycaster', {
     var els;
     var layer = data.layer;
     var lastLayer = this.lastLayer || layer;
-    if (this.lastObjects) {
-      for (const obj of this.lastObjects) {
-        obj.layers.disable(lastLayer);
+    var i;
+    var lastObjects = this.lastObjects;
+    if (lastObjects) {
+      for (i = 0; i < lastObjects.length; i++) {
+        lastObjects[i].layers.disable(lastLayer);
       }
     }
     // If objects not defined, intersect with everything.
@@ -189,9 +191,9 @@ module.exports.Component = registerComponent('raycaster', {
     this.objects = this.flattenObject3DMaps(els);
     this.lastObjects = [...this.objects];
     if (this.objects) {
-      for (const obj of this.objects) {
-        if (obj.visible) {
-          obj.layers.enable(layer);
+      for (i = 0; i < this.objects.length; i++) {
+        if (this.objects[i].visible) {
+          this.objects[i].layers.enable(layer);
         }
       }
       this.lastLayer = undefined;
