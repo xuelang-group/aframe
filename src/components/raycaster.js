@@ -42,6 +42,7 @@ var EVENTS = {
 module.exports.Component = registerComponent('raycaster', {
   schema: {
     autoRefresh: {default: true},
+    layer: {type: 'int', default: 31},
     direction: {type: 'vec3', default: {x: 0, y: 0, z: -1}},
     enabled: {default: true},
     far: {default: 1000},
@@ -92,11 +93,11 @@ module.exports.Component = registerComponent('raycaster', {
     var data = this.data;
     var el = this.el;
     var raycaster = this.raycaster;
-
+    this.lastLayer = oldData.layer;
     // Set raycaster properties.
     raycaster.far = data.far;
     raycaster.near = data.near;
-
+    raycaster.layers.set(data.layer);
     // Draw line.
     if (data.showLine &&
         (data.far !== oldData.far || data.origin !== oldData.origin ||
@@ -174,12 +175,27 @@ module.exports.Component = registerComponent('raycaster', {
   refreshObjects: function () {
     var data = this.data;
     var els;
-
+    var layer = data.layer;
+    var lastLayer = this.lastLayer || layer;
+    if (this.lastObjects) {
+      for (const obj of this.lastObjects) {
+        obj.layers.disable(lastLayer);
+      }
+    }
     // If objects not defined, intersect with everything.
     els = data.objects
       ? this.el.sceneEl.querySelectorAll(data.objects)
       : this.el.sceneEl.querySelectorAll('*');
     this.objects = this.flattenObject3DMaps(els);
+    this.lastObjects = [...this.objects];
+    if (this.objects) {
+      for (const obj of this.objects) {
+        if (obj.visible) {
+          obj.layers.enable(layer);
+        }
+      }
+      this.lastLayer = undefined;
+    }
     this.dirty = false;
   },
 
