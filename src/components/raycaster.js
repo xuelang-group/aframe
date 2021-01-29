@@ -175,27 +175,21 @@ module.exports.Component = registerComponent('raycaster', {
   refreshObjects: function () {
     var data = this.data;
     var els;
-    var layer = data.layer;
-    var lastLayer = this.lastLayer || layer;
-    if (this.lastObjects) {
-      for (const obj of this.lastObjects) {
-        obj.layers.disable(lastLayer);
+    var lastLayer = this.lastLayer || data.layer;
+    var i;
+    var lastObjects = this.lastObjects;
+    if (lastObjects) {
+      for (i = 0; i < lastObjects.length; i++) {
+        lastObjects[i].layers.disable(lastLayer);
       }
     }
+    this.lastLayer = undefined;
     // If objects not defined, intersect with everything.
     els = data.objects
       ? this.el.sceneEl.querySelectorAll(data.objects)
       : this.el.sceneEl.querySelectorAll('*');
     this.objects = this.flattenObject3DMaps(els);
     this.lastObjects = [...this.objects];
-    if (this.objects) {
-      for (const obj of this.objects) {
-        if (obj.visible) {
-          obj.layers.enable(layer);
-        }
-      }
-      this.lastLayer = undefined;
-    }
     this.dirty = false;
   },
 
@@ -241,6 +235,15 @@ module.exports.Component = registerComponent('raycaster', {
     // Raycast.
     this.updateOriginDirection();
     rawIntersections.length = 0;
+    if (this.objects) {
+      for (i = 0; i < this.objects.length; i++) {
+        if (this.objects[i].visible) {
+          this.objects[i].layers.enable(data.layer);
+        } else {
+          this.objects[i].layers.disable(data.layer);
+        }
+      }
+    }
     this.raycaster.intersectObjects(this.objects, true, rawIntersections);
 
     // Only keep intersections against objects that have a reference to an entity.
