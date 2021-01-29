@@ -60192,6 +60192,7 @@ var EVENTS = {
 module.exports.Component = registerComponent('raycaster', {
   schema: {
     autoRefresh: {default: true},
+    layer: {type: 'int', default: 31},
     direction: {type: 'vec3', default: {x: 0, y: 0, z: -1}},
     enabled: {default: true},
     far: {default: 1000},
@@ -60242,11 +60243,11 @@ module.exports.Component = registerComponent('raycaster', {
     var data = this.data;
     var el = this.el;
     var raycaster = this.raycaster;
-
+    this.lastLayer = oldData.layer;
     // Set raycaster properties.
     raycaster.far = data.far;
     raycaster.near = data.near;
-
+    raycaster.layers.set(data.layer);
     // Draw line.
     if (data.showLine &&
         (data.far !== oldData.far || data.origin !== oldData.origin ||
@@ -60324,12 +60325,21 @@ module.exports.Component = registerComponent('raycaster', {
   refreshObjects: function () {
     var data = this.data;
     var els;
-
+    var lastLayer = this.lastLayer || data.layer;
+    var i;
+    var lastObjects = this.lastObjects;
+    if (lastObjects) {
+      for (i = 0; i < lastObjects.length; i++) {
+        lastObjects[i].layers.disable(lastLayer);
+      }
+    }
+    this.lastLayer = undefined;
     // If objects not defined, intersect with everything.
     els = data.objects
       ? this.el.sceneEl.querySelectorAll(data.objects)
       : this.el.sceneEl.querySelectorAll('*');
     this.objects = this.flattenObject3DMaps(els);
+    this.lastObjects = [...this.objects];
     this.dirty = false;
   },
 
@@ -60375,6 +60385,15 @@ module.exports.Component = registerComponent('raycaster', {
     // Raycast.
     this.updateOriginDirection();
     rawIntersections.length = 0;
+    if (this.objects) {
+      for (i = 0; i < this.objects.length; i++) {
+        if (this.objects[i].visible) {
+          this.objects[i].layers.enable(data.layer);
+        } else {
+          this.objects[i].layers.disable(data.layer);
+        }
+      }
+    }
     this.raycaster.intersectObjects(this.objects, true, rawIntersections);
 
     // Only keep intersections against objects that have a reference to an entity.
@@ -70514,7 +70533,7 @@ _dereq_('./core/a-mixin');
 _dereq_('./extras/components/');
 _dereq_('./extras/primitives/');
 
-console.log('A-Frame Version: 1.1.0 (Date 2021-01-25, Commit #a585991c)');
+console.log('A-Frame Version: 1.1.0 (Date 2021-01-29, Commit #4d06ef75)');
 console.log('THREE Version (https://github.com/supermedium/three.js):',
             pkg.dependencies['super-three']);
 console.log('WebVR Polyfill Version:', pkg.dependencies['webvr-polyfill']);
