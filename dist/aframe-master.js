@@ -61027,7 +61027,6 @@ var EVENTS = {
 module.exports.Component = registerComponent('raycaster', {
   schema: {
     autoRefresh: {default: true},
-    layer: {type: 'int', default: 0},
     direction: {type: 'vec3', default: {x: 0, y: 0, z: -1}},
     enabled: {default: true},
     far: {default: 1000},
@@ -61078,10 +61077,11 @@ module.exports.Component = registerComponent('raycaster', {
     var data = this.data;
     var el = this.el;
     var raycaster = this.raycaster;
+
     // Set raycaster properties.
     raycaster.far = data.far;
     raycaster.near = data.near;
-    raycaster.layers.set(data.layer);
+
     // Draw line.
     if (data.showLine &&
         (data.far !== oldData.far || data.origin !== oldData.origin ||
@@ -61159,13 +61159,12 @@ module.exports.Component = registerComponent('raycaster', {
   refreshObjects: function () {
     var data = this.data;
     var els;
-    this.lastLayer = undefined;
+
     // If objects not defined, intersect with everything.
     els = data.objects
       ? this.el.sceneEl.querySelectorAll(data.objects)
       : this.el.sceneEl.querySelectorAll('*');
     this.objects = this.flattenObject3DMaps(els);
-    this.lastObjects = [...this.objects];
     this.dirty = false;
   },
 
@@ -61480,16 +61479,46 @@ var COMPONENTS = _dereq_('../../core/component').components;
 module.exports.Component = register('background', {
   schema: {
     color: {type: 'color', default: 'black'},
-    transparent: {default: false}
+    transparent: {default: false},
+    generateEnvironment: {default: true}
+  },
+  init: function () {
+    this.cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128, { format: THREE.RGBFormat, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
+    this.cubeCamera = new THREE.CubeCamera(1, 100000, this.cubeRenderTarget);
+    this.needsEnvironmentUpdate = true;
   },
   update: function () {
+    var scene = this.el.sceneEl.object3D;
     var data = this.data;
     var object3D = this.el.object3D;
     if (data.transparent) {
       object3D.background = null;
+    } else {
+      object3D.background = new THREE.Color(data.color);
+    }
+
+    if (scene.environment && scene.environment !== this.cubeRenderTarget.texture) {
+      console.warn('Background will not overide predefined environment maps');
       return;
     }
-    object3D.background = new THREE.Color(data.color);
+
+    if (data.generateEnvironment) {
+      scene.environment = this.cubeRenderTarget.texture;
+    } else {
+      scene.environment = null;
+    }
+  },
+
+  tick: function () {
+    if (!this.needsEnvironmentUpdate) return;
+    var scene = this.el.object3D;
+    var renderer = this.el.renderer;
+    var camera = this.el.camera;
+
+    this.el.object3D.add(this.cubeCamera);
+    this.cubeCamera.position.copy(camera.position);
+    this.cubeCamera.update(renderer, scene);
+    this.needsEnvironmentUpdate = false;
   },
 
   remove: function () {
@@ -61498,6 +61527,9 @@ module.exports.Component = register('background', {
     if (data.transparent) {
       object3D.background = null;
       return;
+    }
+    if (object3D.environment === this.cubeRenderTarget.texture) {
+      object3D.environment = null;
     }
     object3D.background = COMPONENTS[this.name].schema.color.default;
   }
@@ -71377,7 +71409,7 @@ _dereq_('./core/a-mixin');
 _dereq_('./extras/components/');
 _dereq_('./extras/primitives/');
 
-console.log('A-Frame Version: 1.2.0 (Date 2021-02-20, Commit #dd072fa9)');
+console.log('A-Frame Version: 1.2.0 (Date 2021-03-03, Commit #9bc5a0ad)');
 console.log('THREE Version (https://github.com/supermedium/three.js):',
             pkg.dependencies['super-three']);
 console.log('WebVR Polyfill Version:', pkg.dependencies['webvr-polyfill']);
