@@ -62,7 +62,7 @@ use of resources, we will need deeper understanding about 3D graphics.  See
 [release]: https://github.com/aframevr/aframe/releases
 [webxr]: https://immersive-web.github.io/webxr/
 
-If you are using A-Frame 1.1.0 or older you probably need to update to the [latest release][release]. Browsers are migrating to the [WebXR standard][webxr] and old versions might no longer work.
+If you are using A-Frame 1.2.0 or older you probably need to update to the [latest release][release]. Browsers are migrating to the [WebXR standard][webxr] and old versions might no longer work.
 
 You also have to serve your content over HTTPS. The WebXR API won't be available over HTTP.
 
@@ -70,6 +70,9 @@ You also have to serve your content over HTTPS. The WebXR API won't be available
 
 [cors]: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
 [localserver]: ./installation.md#local-development
+[startplayback]: https://aframe.io/aframe/examples/test/video/
+[videotestcode]: https://github.com/aframevr/aframe/blob/master/examples/test/video/index.html
+[videoplaycomponent]: https://github.com/aframevr/aframe/blob/master/examples/js/play-on-click.js
 
 First, if you are doing local development, make sure you are [using a local
 server][localserver] so that asset requests work properly.
@@ -81,6 +84,8 @@ the same domain (directory) as your application.
 
 If you are trying to load a video, make sure the browser supports the video
 (i.e., encoding, framerate, size).
+
+Video autoplay policies are getting more and more strict and rules might vary accross browsers. Mandatory user gesture is now commonly enforced. For maximum compatibility, you can offer a button that the user can click to start [video playback][startplayback]. [Simple sample code][videotestcode] can be found in the docs. Pay particular attention to the [play-on-click component][videoplaycomponent]
 
 Read the [*Hosting and Publishing* guide](./hosting-and-publishing.md) for more
 information.
